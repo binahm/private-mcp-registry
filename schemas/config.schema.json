@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/your-org/private-mcp-registry/schemas/config.schema.json",
+    "title": "MCP Registry Config",
+    "description": "Local configuration for the registry compilation process",
+    "type": "object",
+    "properties": {
+        "output": {
+            "type": "string",
+            "description": "Output path for compiled registry",
+            "default": "dist/registry.json"
+        },
+        "fetchTimeout": {
+            "type": "integer",
+            "description": "Timeout in seconds for fetching public registries",
+            "default": 30,
+            "minimum": 1,
+            "maximum": 300
+        }
+    },
+    "additionalProperties": false
+}

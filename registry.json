@@ -1,0 +1,18 @@
+{
+    "registries": [
+        {
+            "name": "MCP Official",
+            "url": "https://registry.modelcontextprotocol.io",
+            "servers": {
+                "ai.exa/exa": "latest"
+            }
+        },
+        {
+            "name": "private",
+            "type": "private",
+            "servers_relative_path": [
+                "mcps/example/hello-world/server.json"
+            ]
+        }
+    ]
+}
