@@ -27,7 +27,7 @@ class TestFetchServerListReal:
         Then it should return servers from the registry
         """
         # Given
-        url = "https://registry.modelcontextprotocol.io"
+        url = "https://api.mcp.github.com/"
 
         # When
         servers = list(fetch_server_list(url, timeout=10))

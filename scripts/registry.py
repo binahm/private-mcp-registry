@@ -114,6 +114,37 @@ def cmd_compile(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_add(args: argparse.Namespace) -> int:
+    """Add a new private MCP server."""
+    from scripts.adder import add_server
+
+    # Parse url_or_command based on transport type
+    url_or_cmd = args.url_or_command
+    # Remove leading '--' if present (argparse.REMAINDER keeps it)
+    if url_or_cmd and url_or_cmd[0] == "--":
+        url_or_cmd = url_or_cmd[1:]
+
+    if args.transport in ("sse", "streamable-http"):
+        url = url_or_cmd[0] if url_or_cmd else None
+        command = []
+    else:  # stdio
+        url = None
+        command = url_or_cmd
+
+    result = add_server(
+        name=args.name,
+        transport=args.transport,
+        url=url,
+        command=command,
+        description=args.description,
+        env_vars=args.env,
+        root_dir=ROOT_DIR,
+        quiet=args.quiet,
+        json_output=args.json,
+    )
+    return 0 if result.success else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         prog="mcp-registry",
@@ -142,6 +173,38 @@ def main() -> int:
         "compile", help="Compile registry from public + private sources"
     )
     compile_parser.set_defaults(func=cmd_compile)
+
+    # add command
+    add_parser = subparsers.add_parser(
+        "add", help="Add a new private MCP server"
+    )
+    add_parser.add_argument(
+        "--transport", "-t",
+        required=True,
+        choices=["stdio", "sse", "streamable-http"],
+        help="Transport type",
+    )
+    add_parser.add_argument(
+        "name",
+        help="Server name in author/name format",
+    )
+    add_parser.add_argument(
+        "url_or_command",
+        nargs=argparse.REMAINDER,
+        help="URL for sse/streamable-http, or command after -- for stdio",
+    )
+    add_parser.add_argument(
+        "--description", "-d",
+        default="",
+        help="Server description",
+    )
+    add_parser.add_argument(
+        "--env", "-e",
+        action="append",
+        default=[],
+        help="Environment variable (KEY or KEY=default)",
+    )
+    add_parser.set_defaults(func=cmd_add)
 
     args = parser.parse_args()
     return args.func(args)

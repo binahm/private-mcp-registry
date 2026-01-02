@@ -19,6 +19,12 @@ python scripts/registry.py validate
 
 # Compile registry
 python scripts/registry.py compile
+
+# Add a remote MCP server (SSE)
+python scripts/registry.py add --transport sse atlassian/rovo https://mcp.atlassian.com/v1/sse
+
+# Add a stdio MCP server (npx)
+python scripts/registry.py add --transport stdio anthropic/everything -- npx -y @anthropic/mcp-server-everything
 ```
 
 ## Configuration
