@@ -16,6 +16,11 @@
             "default": 30,
             "minimum": 1,
             "maximum": 300
+        },
+        "registryName": {
+            "type": "string",
+            "description": "Registry name key used in _meta for private servers",
+            "default": "io.modelcontextprotocol.registry/publisher-provided"
         }
     },
     "additionalProperties": false

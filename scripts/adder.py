@@ -40,14 +40,19 @@ def parse_env_var(env_str: str) -> EnvVar:
     return EnvVar(name=env_str.strip())
 
 
+DEFAULT_REGISTRY_NAME = "io.modelcontextprotocol.registry/publisher-provided"
+
+
 def build_remote_server(
     name: str,
     transport: str,
     url: str,
     description: str,
+    registry_name: str | None = None,
 ) -> dict:
     """Build server.json content for remote (sse/streamable-http) server."""
     now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    meta_key = registry_name or DEFAULT_REGISTRY_NAME
     return {
         "server": {
             "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
@@ -59,7 +64,7 @@ def build_remote_server(
             ],
         },
         "_meta": {
-            "io.modelcontextprotocol.registry/official": {
+            meta_key: {
                 "status": "active",
                 "publishedAt": now,
                 "updatedAt": now,
@@ -74,9 +79,11 @@ def build_stdio_server(
     command: list[str],
     description: str,
     env_vars: list[EnvVar],
+    registry_name: str | None = None,
 ) -> dict:
     """Build server.json content for stdio server."""
     now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    meta_key = registry_name or DEFAULT_REGISTRY_NAME
 
     # Detect package type from command
     package = build_package_from_command(command, env_vars)
@@ -90,7 +97,7 @@ def build_stdio_server(
             "packages": [package],
         },
         "_meta": {
-            "io.modelcontextprotocol.registry/official": {
+            meta_key: {
                 "status": "active",
                 "publishedAt": now,
                 "updatedAt": now,
@@ -194,6 +201,7 @@ def add_server(
     root_dir: Path,
     quiet: bool = False,
     json_output: bool = False,
+    registry_name: str | None = None,
 ) -> AddResult:
     """Main entry point for add command."""
     try:
@@ -205,11 +213,12 @@ def add_server(
         if transport in ("sse", "streamable-http"):
             if not url:
                 return AddResult(False, message=f"URL required for {transport} transport")
-            server_data = build_remote_server(name, transport, url, description)
+            server_data = build_remote_server(name, transport, url, description, registry_name)
         else:  # stdio
             if not command:
-                return AddResult(False, message="Command required for stdio transport (use -- before command)")
-            server_data = build_stdio_server(name, command, description, parsed_env)
+                msg = "Command required for stdio transport (use -- before command)"
+                return AddResult(False, message=msg)
+            server_data = build_stdio_server(name, command, description, parsed_env, registry_name)
 
         # Create directory and file
         server_dir = root_dir / "mcps" / author / server_name

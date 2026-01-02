@@ -16,6 +16,7 @@ def load_config() -> dict:
     defaults = {
         "output": "dist/registry.json",
         "fetchTimeout": 30,
+        "registryName": "io.modelcontextprotocol.registry/publisher-provided",
     }
     if config_path.exists():
         with open(config_path) as f:
@@ -118,6 +119,9 @@ def cmd_add(args: argparse.Namespace) -> int:
     """Add a new private MCP server."""
     from scripts.adder import add_server
 
+    # Load config for registry name
+    config = load_config()
+
     # Parse url_or_command based on transport type
     url_or_cmd = args.url_or_command
     # Remove leading '--' if present (argparse.REMAINDER keeps it)
@@ -141,6 +145,7 @@ def cmd_add(args: argparse.Namespace) -> int:
         root_dir=ROOT_DIR,
         quiet=args.quiet,
         json_output=args.json,
+        registry_name=config.get("registryName"),
     )
     return 0 if result.success else 1
 
