@@ -8,7 +8,7 @@ from pathlib import Path
 
 # Project root (parent of scripts/)
 ROOT_DIR = Path(__file__).parent.parent
-
+DEFAULT_REGISTRY_NAME = "io.modelcontextprotocol.registry/private"
 
 def load_config() -> dict:
     """Load config.json with defaults."""
@@ -101,7 +101,9 @@ def cmd_compile(args: argparse.Namespace) -> int:
 
     # Write output
     output_path = ROOT_DIR / config.get("output", "dist/registry.json")
-    write_compiled_registry(result.servers, output_path)
+
+    registry_name = config.get("registryName", DEFAULT_REGISTRY_NAME)
+    write_compiled_registry(result.servers, output_path, registry_name)
 
     if args.json:
         print(json.dumps({

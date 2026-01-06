@@ -47,13 +47,11 @@ class TestLoadPrivateServer:
         When load_private_server is called
         Then it should return a ServerEntry with correct data
         """
-        # Given
+        # Given - flattened format (no "server" wrapper)
         server_data = {
-            "server": {
-                "name": "my-org/my-server",
-                "version": "0.1.0",
-                "description": "Test server",
-            }
+            "name": "my-org/my-server",
+            "version": "0.1.0",
+            "description": "Test server",
         }
         mcps_dir = temp_dir / "mcps" / "my-org"
         mcps_dir.mkdir(parents=True)
@@ -177,14 +175,12 @@ class TestCompileRegistry:
         When compile_registry is called
         Then it should return those servers in the result
         """
-        # Given
+        # Given - flattened format (no "server" wrapper)
         mcps_dir = temp_dir / "mcps" / "org"
         mcps_dir.mkdir(parents=True)
         server_path = mcps_dir / "server.json"
         with open(server_path, "w") as f:
-            json.dump({
-                "server": {"name": "org/server", "version": "1.0"},
-            }, f)
+            json.dump({"name": "org/server", "version": "1.0"}, f)
 
         registry_config = {
             "registries": [

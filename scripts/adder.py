@@ -1,9 +1,8 @@
 """Add command implementation - creates private MCP server definitions."""
 
-from dataclasses import dataclass
-from datetime import datetime, timezone
-from pathlib import Path
 import json
+from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
@@ -40,37 +39,21 @@ def parse_env_var(env_str: str) -> EnvVar:
     return EnvVar(name=env_str.strip())
 
 
-DEFAULT_REGISTRY_NAME = "io.modelcontextprotocol.registry/publisher-provided"
-
-
 def build_remote_server(
     name: str,
     transport: str,
     url: str,
     description: str,
-    registry_name: str | None = None,
 ) -> dict:
     """Build server.json content for remote (sse/streamable-http) server."""
-    now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
-    meta_key = registry_name or DEFAULT_REGISTRY_NAME
     return {
-        "server": {
-            "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
-            "name": name,
-            "description": description or f"Private MCP server: {name}",
-            "version": "1.0.0",
-            "remotes": [
-                {"type": transport, "url": url}
-            ],
-        },
-        "_meta": {
-            meta_key: {
-                "status": "active",
-                "publishedAt": now,
-                "updatedAt": now,
-                "isLatest": True,
-            }
-        },
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+        "name": name,
+        "description": description or f"Private MCP server: {name}",
+        "version": "1.0.0",
+        "remotes": [
+            {"type": transport, "url": url}
+        ],
     }
 
 
@@ -79,31 +62,16 @@ def build_stdio_server(
     command: list[str],
     description: str,
     env_vars: list[EnvVar],
-    registry_name: str | None = None,
 ) -> dict:
     """Build server.json content for stdio server."""
-    now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
-    meta_key = registry_name or DEFAULT_REGISTRY_NAME
-
-    # Detect package type from command
     package = build_package_from_command(command, env_vars)
 
     return {
-        "server": {
-            "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
-            "name": name,
-            "description": description or f"Private MCP server: {name}",
-            "version": "1.0.0",
-            "packages": [package],
-        },
-        "_meta": {
-            meta_key: {
-                "status": "active",
-                "publishedAt": now,
-                "updatedAt": now,
-                "isLatest": True,
-            }
-        },
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+        "name": name,
+        "description": description or f"Private MCP server: {name}",
+        "version": "1.0.0",
+        "packages": [package],
     }
 
 
@@ -201,7 +169,6 @@ def add_server(
     root_dir: Path,
     quiet: bool = False,
     json_output: bool = False,
-    registry_name: str | None = None,
 ) -> AddResult:
     """Main entry point for add command."""
     try:
@@ -213,12 +180,12 @@ def add_server(
         if transport in ("sse", "streamable-http"):
             if not url:
                 return AddResult(False, message=f"URL required for {transport} transport")
-            server_data = build_remote_server(name, transport, url, description, registry_name)
+            server_data = build_remote_server(name, transport, url, description)
         else:  # stdio
             if not command:
                 msg = "Command required for stdio transport (use -- before command)"
                 return AddResult(False, message=msg)
-            server_data = build_stdio_server(name, command, description, parsed_env, registry_name)
+            server_data = build_stdio_server(name, command, description, parsed_env)
 
         # Create directory and file
         server_dir = root_dir / "mcps" / author / server_name
@@ -246,7 +213,7 @@ def add_server(
             print()
         elif not quiet:
             print(f"Created {server_path}")
-            print(f"Added to registry.json")
+            print("Added to registry.json")
 
         return AddResult(True, server_path=server_path)
 

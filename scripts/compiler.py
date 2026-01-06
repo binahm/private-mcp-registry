@@ -2,6 +2,7 @@
 
 import json
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -34,10 +35,10 @@ def load_private_server(
     with open(server_path) as f:
         data = json.load(f)
 
-    server_info = data.get("server", {})
+    # Private servers use flattened format (no "server" wrapper)
     return ServerEntry(
-        name=server_info.get("name", ""),
-        version=server_info.get("version", ""),
+        name=data.get("name", ""),
+        version=data.get("version", ""),
         data=data,
         source=registry_name,
     )
@@ -121,18 +122,39 @@ def compile_registry(
 def write_compiled_registry(
     servers: list[ServerEntry],
     output_path: Path,
+    registry_name: str = "io.modelcontextprotocol.registry/private",
 ) -> None:
     """Write the compiled registry to a JSON file."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    output = {
-        "servers": [
-            {
+    now = datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+    def wrap_server(server: ServerEntry) -> dict:
+        """Wrap server data in API-compatible format."""
+        # Check if data is already wrapped (from public registry)
+        if "server" in server.data:
+            # Already wrapped (public registry format)
+            return {
                 **server.data,
                 "_source": server.source,
             }
-            for server in servers
-        ],
+        else:
+            # Flattened format (private server) - wrap it
+            return {
+                "server": server.data,
+                "_meta": {
+                    registry_name: {
+                        "status": "active",
+                        "publishedAt": now,
+                        "updatedAt": now,
+                        "isLatest": True,
+                    }
+                },
+                "_source": server.source,
+            }
+
+    output = {
+        "servers": [wrap_server(server) for server in servers],
         "metadata": {
             "count": len(servers),
         }

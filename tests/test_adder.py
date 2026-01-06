@@ -1,16 +1,16 @@
 """Tests for add command."""
 
 import json
+
 import pytest
-from pathlib import Path
+
 from scripts.adder import (
-    parse_name,
-    parse_env_var,
-    build_remote_server,
-    build_stdio_server,
-    build_package_from_command,
-    add_server,
     EnvVar,
+    add_server,
+    build_package_from_command,
+    build_remote_server,
+    parse_env_var,
+    parse_name,
 )
 
 
@@ -71,14 +71,14 @@ class TestBuildRemoteServer:
             url="https://example.com/sse",
             description="Test server",
         )
-        assert result["server"]["name"] == "test/server"
-        assert result["server"]["remotes"][0]["type"] == "sse"
-        assert result["server"]["remotes"][0]["url"] == "https://example.com/sse"
+        assert result["name"] == "test/server"
+        assert result["remotes"][0]["type"] == "sse"
+        assert result["remotes"][0]["url"] == "https://example.com/sse"
 
     def test_default_description(self):
         """Given empty description, uses default."""
         result = build_remote_server("x/y", "sse", "https://x.com", "")
-        assert "x/y" in result["server"]["description"]
+        assert "x/y" in result["description"]
 
 
 class TestBuildPackageFromCommand:
@@ -114,7 +114,11 @@ class TestAddServer:
     def test_add_remote_server(self, tmp_path):
         """Given remote server args, creates server.json and updates registry."""
         # Setup
-        registry = {"registries": [{"name": "private", "type": "private", "servers_relative_path": []}]}
+        registry = {
+            "registries": [
+                {"name": "private", "type": "private", "servers_relative_path": []}
+            ]
+        }
         (tmp_path / "registry.json").write_text(json.dumps(registry))
         (tmp_path / "mcps").mkdir()
 
@@ -136,14 +140,19 @@ class TestAddServer:
         assert server_path.exists()
 
         server = json.loads(server_path.read_text())
-        assert server["server"]["remotes"][0]["url"] == "https://example.com/sse"
+        assert server["remotes"][0]["url"] == "https://example.com/sse"
 
         updated_registry = json.loads((tmp_path / "registry.json").read_text())
-        assert "mcps/test/myserver/server.json" in updated_registry["registries"][0]["servers_relative_path"]
+        paths = updated_registry["registries"][0]["servers_relative_path"]
+        assert "mcps/test/myserver/server.json" in paths
 
     def test_add_stdio_server(self, tmp_path):
         """Given stdio server args, creates package-based server.json."""
-        registry = {"registries": [{"name": "private", "type": "private", "servers_relative_path": []}]}
+        registry = {
+            "registries": [
+                {"name": "private", "type": "private", "servers_relative_path": []}
+            ]
+        }
         (tmp_path / "registry.json").write_text(json.dumps(registry))
         (tmp_path / "mcps").mkdir()
 
@@ -160,8 +169,8 @@ class TestAddServer:
 
         assert result.success
         server = json.loads((tmp_path / "mcps/test/npxserver/server.json").read_text())
-        assert server["server"]["packages"][0]["registryType"] == "npm"
-        assert len(server["server"]["packages"][0]["environmentVariables"]) == 2
+        assert server["packages"][0]["registryType"] == "npm"
+        assert len(server["packages"][0]["environmentVariables"]) == 2
 
     def test_missing_url_for_remote(self, tmp_path):
         """Given remote transport without URL, returns error."""

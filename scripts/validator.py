@@ -3,7 +3,6 @@
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 import jsonschema
 import requests
@@ -132,28 +131,21 @@ def validate_server_json(
         result.add_error(str(relative_path), "", f"Invalid JSON: {e}")
         return result
 
-    # Server definition should have "server" key with nested schema
-    if "server" not in server_data:
-        result.add_error(str(relative_path), "", "Missing 'server' key")
-        return result
-
-    server = server_data["server"]
-
-    # Get schema URL from $schema field
-    schema_url = server.get("$schema")
+    # Get schema URL from $schema field (now at root level)
+    schema_url = server_data.get("$schema")
     if not schema_url:
-        result.add_error(str(relative_path), "server", "Missing '$schema' field")
+        result.add_error(str(relative_path), "", "Missing '$schema' field")
         return result
 
     # Fetch and validate against remote schema
     try:
         schema = fetch_remote_schema(schema_url)
-        schema_result = validate_against_schema(server, schema, str(relative_path))
+        schema_result = validate_against_schema(server_data, schema, str(relative_path))
         result.merge(schema_result)
     except requests.RequestException as e:
-        result.add_error(str(relative_path), "server.$schema", f"Failed to fetch schema: {e}")
+        result.add_error(str(relative_path), "$schema", f"Failed to fetch schema: {e}")
     except json.JSONDecodeError as e:
-        result.add_error(str(relative_path), "server.$schema", f"Invalid schema JSON: {e}")
+        result.add_error(str(relative_path), "$schema", f"Invalid schema JSON: {e}")
 
     return result
 
