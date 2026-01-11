@@ -9,7 +9,7 @@
         },
         {
             "name": "MCP Official",
-            "url": "https://api.mcp.github.com",
+            "url": "https://foo.mcp.github.com",
             "servers": "*"
         },
         {
