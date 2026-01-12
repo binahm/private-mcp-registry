@@ -10,9 +10,7 @@
         {
             "name": "Github Copilot",
             "url": "https://api.mcp.github.com",
-            "servers": {
-                "microsoft/markitdown": "latest"
-            }
+            "servers": "*"
         },
         {
             "name": "private",
