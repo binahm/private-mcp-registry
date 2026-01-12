@@ -8,6 +8,13 @@
             }
         },
         {
+            "name": "Github Copilot",
+            "url": "https://app.mcp.github.com",
+            "servers": {
+                "microsoft/markitdown": "latest"
+            }
+        },
+        {
             "name": "private",
             "type": "private",
             "servers_relative_path": [
