@@ -8,6 +8,11 @@
             }
         },
         {
+            "name": "Github Copilot",
+            "url": "https://api.mcp.github.com",
+            "servers": "*"
+        },
+        {
             "name": "private",
             "type": "private",
             "servers_relative_path": [
