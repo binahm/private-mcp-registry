@@ -2,7 +2,7 @@
     "registries": [
         {
             "name": "Github Copilot",
-            "url": "https://api.mcp.github.com",
+            "url": "https://registry.modelcontextprotocol.io",
             "servers": "*"
         }
     ]
