@@ -1,6 +1,13 @@
 {
     "registries": [
         {
+            "name": "Official MCP Registry",
+            "url": "https://registry.modelcontextprotocol.io",
+            "servers": {
+                "com.monday/monday.com": "0.0.1"
+            }
+        },
+        {
             "name": "Github Copilot",
             "url": "https://api.mcp.github.com",
             "servers": "*"
