@@ -4,7 +4,7 @@
             "name": "Official MCP Registry",
             "url": "https://registry.modelcontextprotocol.io",
             "servers": {
-                "com.monday/monday.com": "0.0.1"
+                "ai.waystation/monday": "0.3.1"
             }
         },
         {
